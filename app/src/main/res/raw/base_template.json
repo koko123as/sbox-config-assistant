@@ -1,0 +1,343 @@
+{
+  "$schema": "https://sing-box.sagernet.org/schema.json",
+  "dns": {
+    "cache_capacity": 8192,
+    "final": "google",
+    "optimistic": {
+      "enabled": true
+    },
+    "rules": [
+      {
+        "query_type": [
+          "AAAA"
+        ],
+        "action": "reject"
+      },
+      {
+        "domain_suffix": [
+          "translate.brave.com",
+          "translate-static.brave.com"
+        ],
+        "server": "ali"
+      },
+      {
+        "action": "reject",
+        "query_type": [
+          "HTTPS",
+          "SVCB"
+        ]
+      },
+      {
+        "clash_mode": "Direct",
+        "server": "ali"
+      },
+      {
+        "clash_mode": "Global",
+        "server": "google"
+      },
+      {
+        "rule_set": [
+          "geosite-cn",
+          "geosite-microsoft@cn",
+          "geosite-apple@cn",
+          "geosite-private"
+        ],
+        "server": "ali"
+      }
+    ],
+    "servers": [
+      {
+        "prefer_go": true,
+        "tag": "local",
+        "type": "local"
+      },
+      {
+        "server": "223.5.5.5",
+        "tag": "ali",
+        "type": "https"
+      },
+      {
+        "detour": "默认",
+        "server": "8.8.8.8",
+        "tag": "google",
+        "type": "https"
+      }
+    ],
+    "strategy": "ipv4_only"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true
+    }
+  },
+  "http_clients": [
+    {
+      "detour": "直连",
+      "tag": "直连下载"
+    }
+  ],
+  "inbounds": [
+    {
+      "address": [
+        "172.19.0.1/30"
+      ],
+      "auto_route": true,
+      "tag": "tun-in",
+      "type": "tun"
+    },
+    {
+      "listen": "0.0.0.0",
+      "listen_port": 7890,
+      "tag": "mixed-in",
+      "type": "mixed"
+    }
+  ],
+  "log": {
+    "disabled": false,
+    "level": "info",
+    "timestamp": true
+  },
+  "route": {
+    "auto_detect_interface": true,
+    "default_domain_resolver": {
+      "server": "ali"
+    },
+    "default_http_client": "直连下载",
+    "final": "Final",
+    "rule_set": [
+      {
+        "format": "binary",
+        "tag": [
+          "geosite-category-ai-!cn",
+          "geosite-youtube",
+          "geosite-google",
+          "geosite-github",
+          "geosite-onedrive",
+          "geosite-microsoft",
+          "geosite-microsoft@cn",
+          "geosite-apple",
+          "geosite-apple@cn",
+          "geosite-telegram",
+          "geosite-tiktok",
+          "geosite-netflix",
+          "geosite-paypal",
+          "geosite-binance",
+          "geosite-okx",
+          "geosite-category-cryptocurrency",
+          "geosite-steam@cn",
+          "geosite-steam",
+          "geosite-geolocation-!cn",
+          "geosite-cn",
+          "geosite-private"
+        ],
+        "type": "remote",
+        "url": "https://gh-proxy.com/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/{tag}.srs"
+      },
+      {
+        "format": "binary",
+        "tag": "geoip-telegram",
+        "type": "remote",
+        "url": "https://gh-proxy.com/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo/geoip/telegram.srs"
+      },
+      {
+        "format": "binary",
+        "tag": "geoip-cn",
+        "type": "remote",
+        "url": "https://gh-proxy.com/https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs"
+      }
+    ],
+    "rules": [
+      {
+        "action": "sniff",
+        "invert": true,
+        "mode": "or",
+        "rules": [
+          {
+            "domain_suffix": "push.apple.com"
+          },
+          {
+            "rule_set": "geoip-telegram"
+          }
+        ],
+        "sniffer": [
+          "http",
+          "tls",
+          "stun",
+          "quic",
+          "dns"
+        ],
+        "timeout": "100ms",
+        "type": "logical"
+      },
+      {
+        "action": "hijack-dns",
+        "mode": "or",
+        "rules": [
+          {
+            "port": 53
+          },
+          {
+            "protocol": "dns"
+          }
+        ],
+        "type": "logical"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "直连"
+      },
+      {
+        "domain_suffix": [
+          "translate.brave.com",
+          "translate-static.brave.com"
+        ],
+        "outbound": "直连"
+      },
+      {
+        "ip_cidr": [
+          "172.65.248.248/32"
+        ],
+        "outbound": "直连"
+      },
+      {
+        "action": "reject",
+        "mode": "or",
+        "no_drop": true,
+        "rules": [
+          {
+            "port": 853
+          },
+          {
+            "protocol": [
+              "stun",
+              "quic"
+            ]
+          }
+        ],
+        "type": "logical"
+      },
+      {
+        "action": "resolve",
+        "network": "icmp"
+      },
+      {
+        "network": "icmp",
+        "outbound": "直连"
+      },
+      {
+        "clash_mode": "Direct",
+        "outbound": "直连"
+      },
+      {
+        "clash_mode": "Global",
+        "outbound": "GLOBAL"
+      },
+      {
+        "package_name": [
+          "ai.manus.agents",
+          "com.openai.chatgpt",
+          "com.google.android.apps.bard",
+          "com.facebook.aura",
+          "com.anthropic.claude",
+          "com.hark.android",
+          "ai.x.grok",
+          "com.twitter.android",
+          "com.arman.firefoxvpn"
+        ],
+        "outbound": "AI应用"
+      },
+      {
+        "outbound": "直连",
+        "rule_set": "geosite-private"
+      },
+      {
+        "outbound": "AI",
+        "rule_set": "geosite-category-ai-!cn"
+      },
+      {
+        "outbound": "默认",
+        "rule_set": "geosite-youtube"
+      },
+      {
+        "outbound": "Google",
+        "rule_set": "geosite-google"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-github"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-onedrive"
+      },
+      {
+        "outbound": "直连",
+        "rule_set": "geosite-microsoft@cn"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-microsoft"
+      },
+      {
+        "outbound": "直连",
+        "rule_set": "geosite-apple@cn"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-apple"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-telegram"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-tiktok"
+      },
+      {
+        "outbound": "默认",
+        "rule_set": "geosite-netflix"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-paypal"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-binance"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-okx"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geosite-category-cryptocurrency"
+      },
+      {
+        "outbound": "直连",
+        "rule_set": "geosite-steam@cn"
+      },
+      {
+        "outbound": "默认",
+        "rule_set": "geosite-steam"
+      },
+      {
+        "outbound": "默认",
+        "rule_set": "geosite-geolocation-!cn"
+      },
+      {
+        "action": "resolve",
+        "inbound": "mixed-in"
+      },
+      {
+        "outbound": "账号",
+        "rule_set": "geoip-telegram"
+      },
+      {
+        "outbound": "直连",
+        "rule_set": "geoip-cn"
+      }
+    ]
+  }
+}
